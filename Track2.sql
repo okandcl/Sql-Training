@@ -105,19 +105,66 @@ WHERE Budget > (
 	from Departments);
 
 -- 2.14 Select the names of departments with more than two employees.
-select *
-from Employees
+select Name
+from Departments
 where (
 	SELECT Department
 	from Employees
-	where count
+	GROUP by Department
+	HAVING count(*)> 2);
 
 -- 2.15 Select the name and last name of employees working for the two departments with lowest budget.
+-- Most Valuable Question  MVQ
+	
+Select name,LastName 
+from Employees 
+where Department in 
+(Select code
+from(
+	Select  Code,dense_rank() Over(Order By Budget asc)r 
+	from Departments)d 
+where d.r < 3);
+
+-- another way around
+
+SELECT e.Name, e.LastName
+FROM Employees e 
+WHERE e.Department in (
+       SELECT sub.Code 
+       FROM (SELECT * FROM Departments d ORDER BY d.budget LIMIT 2) sub 
+       ORDER BY budget DESC LIMIT 2);
+
+-- another way around
+	   
+Select name,LastName 
+from Employees a
+where a.Department in    
+	   (SELECT code FROM Departments d ORDER BY d.budget LIMIT 2)
+
+
 -- 2.16  Add a new department called "Quality Assurance", with a budget of $40,000 and departmental code 11. 
+insert into departments values(11, 'Quality Assurance', 40000)
+
 -- And Add an employee called "Mary Moore" in that department, with SSN 847-21-9811.
+insert into employees values(847219811, 'Mary', 'Moore', 11);
+
 -- 2.17 Reduce the budget of all departments by 10%.
+update departments 
+set budget = 0.9 * budget;
+
 -- 2.18 Reassign all employees from the Research department (code 77) to the IT department (code 14).
+UPDATE Employees
+set Department = 14
+where Department = 77
+
 -- 2.19 Delete from the table all employees in the IT department (code 14).
+delete FROM Employees
+where Department=14
+
 -- 2.20 Delete from the table all employees who work in departments with a budget greater than or equal to $60,000.
+delete FROM Employees 
+where Department in (select Code from Departments where Budget >= 60000) 
+
 -- 2.21 Delete from the table all employees.
+delete from Employees
 
